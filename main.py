@@ -8,18 +8,17 @@ import speech_recognition as sr
 import subprocess
 import asyncio
 
-# === 環境変数の読み込み ===
+# 環境変数の読み込み
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-VOICEVOX_URL = "http://127.0.0.1:50021"
-FFMPEG_PATH = "D:/tsundere-bot/ffmpeg-7.1.1-essentials_build/bin/ffmpeg.exe"
+VOICEVOX_URL = os.getenv("VOICEVOX_URL", "http://127.0.0.1:50021")
 
-# === Botの初期化 ===
+# Botの初期化
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="/", intents=intents)
 
-# === Gemini API：キャラ付き返答生成 ===
+# Gemini API: キャラ付き返答生成
 def get_gemini_reply(prompt, preset="normal"):
     character_traits = {
         "normal": """
@@ -69,7 +68,7 @@ def get_gemini_reply(prompt, preset="normal"):
     result = response.json()
     return result['candidates'][0]['content']['parts'][0]['text']
 
-# === VOICEVOX：音声合成 ===
+# VOICEVOX: 音声合成
 def synthesize_voice(text, speaker=2, file_path="output.wav"):
     res1 = requests.post(f"{VOICEVOX_URL}/audio_query", params={"text": text, "speaker": speaker})
     res1.raise_for_status()
@@ -78,13 +77,13 @@ def synthesize_voice(text, speaker=2, file_path="output.wav"):
     with open(file_path, "wb") as f:
         f.write(res2.content)
 
-# === 会話ログ保存 ===
+# 会話ログ保存
 def log_conversation(user_input, bot_reply, log_file="chat_log.txt"):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(f"[{now}]\nUser: {user_input}\nBot : {bot_reply}\n{'-' * 30}\n")
 
-# === コマンド：VC参加 ===
+# コマンド: VC参加
 @bot.command(name="join")
 async def join(ctx):
     if ctx.author.voice:
@@ -94,7 +93,7 @@ async def join(ctx):
     else:
         await ctx.send("あ～しの声が聞きたいなら、ボイスチャンネルに入ってよ～！")
 
-# === コマンド：VC退出 ===
+# コマンド: VC退出
 @bot.command(name="leave")
 async def leave(ctx):
     if ctx.voice_client:
@@ -103,7 +102,7 @@ async def leave(ctx):
     else:
         await ctx.send("ボイスチャンネルに入ってないじゃん！")
 
-# === コマンド：録音して文字起こし ===
+# コマンド: 録音して文字起こし
 @bot.command(name="listen")
 async def listen(ctx):
     if not ctx.voice_client:
@@ -117,7 +116,7 @@ async def listen(ctx):
         vc.stop()
         await ctx.send("🔴 録音開始するね！ちょっと待ってて～（5秒）")
         ffmpeg_command = [
-            FFMPEG_PATH, "-y",
+            "ffmpeg", "-y",
             "-f", "dshow",
             "-i", "audio=Stereo Mix (Realtek(R) Audio)",
             "-t", "5",
@@ -134,7 +133,7 @@ async def listen(ctx):
     except Exception as e:
         await ctx.send(f"⚠️ 音声認識失敗しちゃったよ～！: {e}")
 
-# === コマンド：質問に音声で返答 ===
+# コマンド: 質問に音声で返答
 @bot.command(name="speak")
 async def speak(ctx, *, args: str = None):
     if not args:
@@ -169,7 +168,7 @@ async def speak(ctx, *, args: str = None):
         log_conversation(text, reply)
 
         vc = ctx.voice_client
-        audio_source = discord.FFmpegPCMAudio("output.wav", executable=FFMPEG_PATH)
+        audio_source = discord.FFmpegPCMAudio("output.wav")
 
         if not vc.is_playing():
             vc.play(audio_source)
@@ -193,6 +192,7 @@ async def command_help(ctx):
 ・angry → キレ気味・毒舌モード
 ・praise → 優しい・褒め褒めモード
 ・tsundere → ツンツン照れ屋モード
+・insult → S気味屋モード
 """
     await ctx.send(help_text)
 
@@ -201,6 +201,7 @@ async def command_help(ctx):
 async def on_ready():
     print(f"✅ ログイン成功: {bot.user}")
 
-# === Bot起動 ===
-bot.run(DISCORD_TOKEN)
+📣
+::contentReference[oaicite:38]{index=38}
+ 
 

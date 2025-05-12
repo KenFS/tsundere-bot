@@ -1,1 +1,18 @@
+# 環境変数ファイル
 .env
+
+# Python キャッシュ
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VSCode 設定ファイル（任意）
+.vscode/
+
+# MacOS や Windows の不要ファイル
+.DS_Store
+Thumbs.db
+
+# 仮想環境（任意。venvやenvを使っているなら）
+venv/
+env/
